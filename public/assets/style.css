@@ -1,0 +1,612 @@
+/* ============================================================
+   ROBOTRACK MONITOR — style.css
+   Theme: Dark Industrial / Control Room
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Barlow+Condensed:wght@400;600;700&display=swap');
+
+/* ---- RESET & ROOT ----------------------------------------- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-base    : #060a10;
+  --bg-surface : #0d1520;
+  --bg-panel   : #111b2a;
+  --bg-hover   : #1a2840;
+  --border     : #1e3050;
+  --border-hi  : #2a4a70;
+
+  --text-pri   : #e2e8f0;
+  --text-sec   : #64748b;
+  --text-dim   : #334155;
+  --text-mono  : 'JetBrains Mono', 'Courier New', monospace;
+  --text-ui    : 'Barlow Condensed', sans-serif;
+
+  --amber      : #f59e0b;
+  --amber-dim  : #78490a;
+  --green      : #22c55e;
+  --red        : #ef4444;
+  --blue       : #3b82f6;
+
+  --sidebar-w  : 240px;
+  --topbar-h   : 48px;
+  --radius     : 4px;
+}
+
+html, body { height: 100%; }
+
+body {
+  font-family  : var(--text-ui);
+  background   : var(--bg-base);
+  color        : var(--text-pri);
+  font-size    : 13px;
+  letter-spacing: 0.02em;
+  overflow     : hidden;
+}
+
+/* ============================================================
+   LOGIN PAGE
+   ============================================================ */
+.login-body {
+  display       : flex;
+  align-items   : center;
+  justify-content: center;
+  min-height    : 100vh;
+  background    :
+    radial-gradient(ellipse at 20% 50%, rgba(245,158,11,0.05) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(59,130,246,0.05) 0%, transparent 60%),
+    var(--bg-base);
+}
+
+.login-wrapper { width: 100%; max-width: 380px; padding: 20px; }
+
+.login-card {
+  background  : var(--bg-surface);
+  border      : 1px solid var(--border);
+  border-top  : 2px solid var(--amber);
+  border-radius: var(--radius);
+  padding     : 40px 36px;
+}
+
+.login-logo {
+  display     : flex;
+  align-items : center;
+  gap         : 12px;
+  margin-bottom: 4px;
+}
+
+.login-title {
+  font-family : var(--text-ui);
+  font-size   : 24px;
+  font-weight : 700;
+  color       : var(--amber);
+  letter-spacing: 0.15em;
+}
+
+.login-subtitle {
+  font-family : var(--text-mono);
+  font-size   : 10px;
+  color       : var(--text-sec);
+  letter-spacing: 0.2em;
+  margin-bottom: 32px;
+}
+
+.alert-error {
+  background   : rgba(239,68,68,0.1);
+  border       : 1px solid rgba(239,68,68,0.3);
+  border-radius: var(--radius);
+  color        : #fca5a5;
+  font-family  : var(--text-mono);
+  font-size    : 11px;
+  padding      : 10px 12px;
+  margin-bottom: 20px;
+}
+
+.form-group { margin-bottom: 18px; }
+
+.form-group label {
+  display      : block;
+  font-family  : var(--text-mono);
+  font-size    : 10px;
+  font-weight  : 700;
+  color        : var(--text-sec);
+  letter-spacing: 0.15em;
+  margin-bottom: 6px;
+}
+
+.form-group input {
+  width        : 100%;
+  background   : var(--bg-panel);
+  border       : 1px solid var(--border);
+  border-radius: var(--radius);
+  color        : var(--text-pri);
+  font-family  : var(--text-mono);
+  font-size    : 13px;
+  padding      : 10px 12px;
+  outline      : none;
+  transition   : border-color 0.15s;
+}
+
+.form-group input:focus {
+  border-color: var(--amber);
+  box-shadow  : 0 0 0 2px rgba(245,158,11,0.12);
+}
+
+.btn-login {
+  display      : flex;
+  align-items  : center;
+  justify-content: center;
+  gap          : 8px;
+  width        : 100%;
+  background   : var(--amber);
+  color        : #000;
+  border       : none;
+  border-radius: var(--radius);
+  font-family  : var(--text-ui);
+  font-size    : 14px;
+  font-weight  : 700;
+  letter-spacing: 0.12em;
+  padding      : 12px;
+  cursor       : pointer;
+  transition   : background 0.15s, transform 0.1s;
+  margin-top   : 8px;
+}
+.btn-login:hover  { background: #fbbf24; }
+.btn-login:active { transform: scale(0.98); }
+
+.login-footer {
+  display      : flex;
+  align-items  : center;
+  gap          : 6px;
+  margin-top   : 28px;
+  font-family  : var(--text-mono);
+  font-size    : 10px;
+  color        : var(--text-sec);
+  letter-spacing: 0.1em;
+}
+
+/* ============================================================
+   DASHBOARD LAYOUT
+   ============================================================ */
+.dash-body { overflow: hidden; }
+
+.topbar {
+  display      : flex;
+  align-items  : center;
+  justify-content: space-between;
+  height       : var(--topbar-h);
+  background   : var(--bg-surface);
+  border-bottom: 1px solid var(--border);
+  padding      : 0 16px;
+  position     : fixed;
+  top          : 0; left: 0; right: 0;
+  z-index      : 100;
+}
+
+.topbar-left  { display: flex; align-items: center; gap: 10px; }
+.topbar-center{ display: flex; align-items: center; gap: 8px; font-family: var(--text-mono); font-size: 11px; }
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+
+.topbar-title {
+  font-family  : var(--text-ui);
+  font-size    : 18px;
+  font-weight  : 700;
+  color        : var(--amber);
+  letter-spacing: 0.15em;
+}
+
+.topbar-version {
+  font-family  : var(--text-mono);
+  font-size    : 10px;
+  color        : var(--text-dim);
+}
+
+.topbar-ts { color: var(--text-sec); }
+
+.topbar-user {
+  display      : flex;
+  align-items  : center;
+  gap          : 5px;
+  font-family  : var(--text-mono);
+  font-size    : 11px;
+  color        : var(--text-sec);
+}
+
+.btn-logout {
+  font-family  : var(--text-mono);
+  font-size    : 10px;
+  font-weight  : 700;
+  letter-spacing: 0.1em;
+  color        : var(--text-sec);
+  border       : 1px solid var(--border);
+  border-radius: var(--radius);
+  padding      : 4px 10px;
+  text-decoration: none;
+  transition   : border-color 0.15s, color 0.15s;
+}
+.btn-logout:hover { border-color: var(--red); color: var(--red); }
+
+/* Live indicator */
+.live-dot {
+  width        : 8px;
+  height       : 8px;
+  border-radius: 50%;
+  background   : var(--text-sec);
+  display      : inline-block;
+  flex-shrink  : 0;
+}
+.live-dot.live  { background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse 2s infinite; }
+.live-dot.error { background: var(--red);   animation: blink 0.8s infinite; }
+
+@keyframes pulse {
+  0%,100% { opacity: 1; }
+  50%      { opacity: 0.5; }
+}
+@keyframes blink {
+  0%,100% { opacity: 1; }
+  50%      { opacity: 0.2; }
+}
+
+/* Status dot (login page) */
+.status-dot.active {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  display: inline-block;
+  box-shadow: 0 0 5px var(--green);
+  animation: pulse 2s infinite;
+}
+
+/* ---- DASH LAYOUT ------------------------------------------ */
+.dash-layout {
+  display     : flex;
+  margin-top  : var(--topbar-h);
+  height      : calc(100vh - var(--topbar-h));
+  overflow    : hidden;
+}
+
+/* ---- SIDEBAR --------------------------------------------- */
+.sidebar {
+  width        : var(--sidebar-w);
+  flex-shrink  : 0;
+  background   : var(--bg-surface);
+  border-right : 1px solid var(--border);
+  display      : flex;
+  flex-direction: column;
+  overflow     : hidden;
+}
+
+.sidebar-header {
+  font-family  : var(--text-mono);
+  font-size    : 9px;
+  font-weight  : 700;
+  letter-spacing: 0.2em;
+  color        : var(--text-sec);
+  padding      : 10px 12px 6px;
+  border-bottom: 1px solid var(--border);
+  background   : var(--bg-panel);
+  flex-shrink  : 0;
+}
+
+.sidebar-section {
+  flex-shrink  : 0;
+  border-top   : 1px solid var(--border);
+}
+
+.robot-list {
+  flex          : 1;
+  overflow-y    : auto;
+  overflow-x    : hidden;
+}
+
+.robot-list::-webkit-scrollbar { width: 4px; }
+.robot-list::-webkit-scrollbar-track { background: transparent; }
+.robot-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.robot-list-loading {
+  font-family  : var(--text-mono);
+  font-size    : 10px;
+  color        : var(--text-sec);
+  padding      : 16px 12px;
+}
+
+.robot-item {
+  padding      : 8px 12px;
+  border-bottom: 1px solid var(--border);
+  cursor       : pointer;
+  transition   : background 0.1s;
+}
+.robot-item:hover    { background: var(--bg-hover); }
+.robot-item.selected { background: rgba(245,158,11,0.08); border-left: 2px solid var(--amber); }
+
+.robot-item-header {
+  display      : flex;
+  align-items  : center;
+  gap          : 6px;
+  margin-bottom: 4px;
+}
+
+.robot-dot {
+  width        : 7px;
+  height       : 7px;
+  border-radius: 50%;
+  flex-shrink  : 0;
+}
+
+.robot-label {
+  font-family  : var(--text-mono);
+  font-size    : 12px;
+  font-weight  : 700;
+  color        : var(--text-pri);
+  flex         : 1;
+}
+
+.robot-status {
+  font-family  : var(--text-mono);
+  font-size    : 9px;
+  color        : var(--text-sec);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.robot-toggle {
+  background   : none;
+  border       : 1px solid var(--border-hi);
+  border-radius: var(--radius);
+  color        : var(--text-sec);
+  cursor       : pointer;
+  font-size    : 13px;
+  line-height  : 1;
+  padding      : 2px 5px;
+  margin-left  : 4px;
+  transition   : color 0.15s, border-color 0.15s;
+  flex-shrink  : 0;
+}
+.robot-toggle:hover    { color: var(--green); border-color: var(--green); }
+.robot-toggle.is-offline { color: var(--red); border-color: var(--red); }
+.robot-toggle.is-offline:hover { color: var(--green); border-color: var(--green); }
+.robot-toggle:disabled { opacity: 0.4; cursor: default; }
+
+.robot-coords {
+  font-family  : var(--text-mono);
+  font-size    : 9px;
+  color        : var(--text-sec);
+  margin-bottom: 4px;
+}
+
+/* Battery bar */
+.robot-bat {
+  display      : flex;
+  align-items  : center;
+  gap          : 6px;
+  font-family  : var(--text-mono);
+  font-size    : 9px;
+  color        : var(--text-sec);
+}
+
+.bat-bar {
+  flex         : 1;
+  height       : 3px;
+  background   : var(--border);
+  border-radius: 2px;
+  overflow     : hidden;
+}
+
+.bat-fill {
+  height       : 100%;
+  border-radius: 2px;
+  transition   : width 0.4s;
+}
+
+/* Battery / Camera placeholders */
+.battery-panel, .camera-panel {
+  padding      : 10px 12px;
+}
+
+.placeholder-text {
+  font-family  : var(--text-mono);
+  font-size    : 9px;
+  color        : var(--text-dim);
+  line-height  : 1.5;
+}
+
+/* ---- MAP AREA -------------------------------------------- */
+.map-area {
+  flex         : 1;
+  display      : flex;
+  flex-direction: column;
+  overflow     : hidden;
+  background   :
+    radial-gradient(circle at 50% 50%, rgba(59,130,246,0.03) 0%, transparent 70%),
+    var(--bg-base);
+}
+
+.map-wrapper {
+  flex         : 1;
+  position     : relative;
+  display      : flex;
+  align-items  : center;
+  justify-content: center;
+  overflow     : hidden;
+  padding      : 8px;
+}
+
+.track-image {
+  max-width    : 100%;
+  max-height   : 100%;
+  width        : 100%;
+  object-fit   : contain;
+  display      : block;
+  border       : 1px solid var(--border);
+  border-radius: var(--radius);
+  user-select  : none;
+}
+
+.robot-canvas {
+  position     : absolute;
+  pointer-events: auto;
+  cursor       : crosshair;
+}
+
+/* Align canvas on top of image */
+.map-wrapper {
+  position     : relative;
+}
+.track-image, .robot-canvas {
+  /* Both are positioned via JS/CSS to overlap */
+}
+
+/* Tooltip */
+.robot-tooltip {
+  position     : absolute;
+  background   : rgba(13,21,32,0.95);
+  border       : 1px solid var(--amber);
+  border-radius: var(--radius);
+  padding      : 8px 10px;
+  font-family  : var(--text-mono);
+  font-size    : 10px;
+  line-height  : 1.7;
+  color        : var(--text-pri);
+  pointer-events: none;
+  z-index      : 50;
+  display      : flex;
+  flex-direction: column;
+  gap          : 1px;
+  max-width    : 160px;
+}
+.robot-tooltip strong { color: var(--amber); font-size: 11px; }
+.robot-tooltip.hidden { display: none; }
+
+/* Map statusbar */
+.map-statusbar {
+  height       : 28px;
+  background   : var(--bg-surface);
+  border-top   : 1px solid var(--border);
+  display      : flex;
+  align-items  : center;
+  gap          : 20px;
+  padding      : 0 16px;
+  font-family  : var(--text-mono);
+  font-size    : 10px;
+  color        : var(--text-sec);
+  flex-shrink  : 0;
+}
+
+.map-source { margin-left: auto; color: var(--text-dim); }
+
+/* ============================================================
+   SCROLLBAR global
+   ============================================================ */
+* { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+
+/* ============================================================
+   ROLE BADGE (topbar)
+   ============================================================ */
+.role-badge {
+  font-family  : var(--text-mono);
+  font-size    : 9px;
+  font-weight  : 700;
+  letter-spacing: 0.12em;
+  padding      : 2px 7px;
+  border-radius: var(--radius);
+  border       : 1px solid;
+}
+.role-admin  { color: var(--amber); border-color: var(--amber-dim); background: rgba(245,158,11,0.08); }
+.role-viewer { color: var(--blue);  border-color: rgba(59,130,246,0.3); background: rgba(59,130,246,0.08); }
+
+/* ============================================================
+   BATTERY WARNING BANNER
+   ============================================================ */
+.battery-banner {
+  position     : fixed;
+  top          : var(--topbar-h);
+  left         : 0; right: 0;
+  z-index      : 90;
+  background   : rgba(239,68,68,0.12);
+  border-bottom: 1px solid rgba(239,68,68,0.4);
+  color        : #fca5a5;
+  font-family  : var(--text-mono);
+  font-size    : 11px;
+  font-weight  : 700;
+  letter-spacing: 0.1em;
+  display      : flex;
+  align-items  : center;
+  gap          : 8px;
+  padding      : 6px 16px;
+  animation    : blink-bg 1.5s infinite;
+}
+.battery-banner.hidden { display: none; }
+
+@keyframes blink-bg {
+  0%,100% { background: rgba(239,68,68,0.12); }
+  50%     { background: rgba(239,68,68,0.22); }
+}
+
+/* ============================================================
+   BATTERY OVERVIEW PANEL
+   ============================================================ */
+.battery-overview-panel {
+  padding   : 6px 0;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.bat-overview-row {
+  display      : flex;
+  align-items  : center;
+  gap          : 6px;
+  padding      : 4px 12px;
+  font-family  : var(--text-mono);
+  font-size    : 10px;
+}
+
+.bat-overview-row.bat-warn {
+  background: rgba(239,68,68,0.07);
+}
+
+.bat-ov-label {
+  width     : 40px;
+  flex-shrink: 0;
+  color     : var(--text-pri);
+  font-weight: 700;
+}
+
+.bat-ov-pct {
+  width     : 32px;
+  text-align: right;
+  flex-shrink: 0;
+  color     : var(--text-sec);
+}
+
+/* ============================================================
+   CAMERA PANEL
+   ============================================================ */
+.camera-panel {
+  padding: 8px 12px;
+}
+
+.camera-img {
+  width        : 100%;
+  border-radius: var(--radius);
+  border       : 1px solid var(--border);
+  display      : block;
+  background   : var(--bg-panel);
+}
+
+.cam-live-dot {
+  display      : inline-block;
+  width        : 6px;
+  height       : 6px;
+  border-radius: 50%;
+  background   : var(--green);
+  box-shadow   : 0 0 5px var(--green);
+  animation    : pulse 2s infinite;
+  margin-left  : 6px;
+  vertical-align: middle;
+}
+
+/* tooltip lage batterij */
+.bat-low-tip { color: #ef4444; font-weight: 700; }
+
+/* offline count in statusbar */
+#offline-count { color: var(--red); font-family: var(--text-mono); font-size: 10px; }
