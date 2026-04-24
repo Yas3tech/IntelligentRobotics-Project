@@ -1,0 +1,28 @@
+# ============================================================
+# .htaccess — RoboTrack Monitor
+# ============================================================
+
+# Bloquer l'accès direct aux dossiers sensibles
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Bloquer accès direct à /config et /data depuis le web
+  RewriteRule ^config/ - [F,L]
+  RewriteRule ^data/   - [F,L]
+</IfModule>
+
+# Masquer les fichiers PHP dans /includes
+<Files ~ "\.php$">
+  Order Deny,Allow
+  Deny from all
+</Files>
+
+# Interdire le directory listing
+Options -Indexes
+
+# Headers sécurité de base
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "SAMEORIGIN"
+  Header set Referrer-Policy "same-origin"
+</IfModule>
