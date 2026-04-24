@@ -2,16 +2,42 @@
 simulate_robots.py — Test simulator voor RoboTrack Dashboard
 =============================================================
 Simuleert 8 robots die het parcours volgen langs de rode randen.
-Schrijft elke 500ms naar public/data/robots_live.json.
+Schrijft elke 500ms naar public/data/robots_live.json
+EN publiceert dezelfde data via MQTT (zelfde topics als echte robots).
 
 Start: python simulate_robots.py
 Stop:  Ctrl+C
+
+MQTT topics gepubliceerd:
+  city/robots/tag<id>          {"x": ..., "y": ..., "theta": ...}  (meters)
+  city/robots/<id>/battery     {"battery": ...}
 """
 
 import json
 import math
 import os
 import time
+
+try:
+    import paho.mqtt.client as mqtt
+    MQTT_AVAILABLE = True
+except ImportError:
+    MQTT_AVAILABLE = False
+
+# ── MQTT configuratie ──────────────────────────────────────────────────
+MQTT_ENABLED  = True          # zet op False om MQTT uit te schakelen
+BROKER_HOST   = "localhost"   # pas aan naar Jetson IP/hostname indien nodig
+BROKER_PORT   = 1883
+
+# Wereld-afmetingen (pixels → meters, omgekeerde van mqtt_bridge.py)
+WORLD_W = 6.0
+WORLD_H = 3.0
+IMG_W   = 2508
+IMG_H   = 1696
+TRACK_OFFSET_X = 267
+TRACK_OFFSET_Y = 204
+TRACK_PX_W     = 2124
+TRACK_PX_H     = 1257
 
 OUTPUT_FILE    = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
@@ -167,9 +193,71 @@ def read_overrides():
     return {}
 
 
+def px_to_world(px: float, py: float) -> tuple[float, float]:
+    """Converteert pixel-coördinaten terug naar wereld-coördinaten (meters)."""
+    x_m = (px - TRACK_OFFSET_X) / TRACK_PX_W * WORLD_W
+    y_m = (py - TRACK_OFFSET_Y) / TRACK_PX_H * WORLD_H
+    return round(max(0.0, x_m), 3), round(max(0.0, y_m), 3)
+
+
+def heading_to_theta(heading_deg: float) -> float:
+    """Converteert dashboard heading (graden, 0=Noord CW) naar theta (radialen, 0=oost CCW)."""
+    return round(math.radians((90.0 - heading_deg) % 360.0), 4)
+
+
+def mqtt_connect() -> "mqtt.Client | None":
+    if not MQTT_ENABLED or not MQTT_AVAILABLE:
+        return None
+    client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
+    try:
+        client.connect(BROKER_HOST, BROKER_PORT, keepalive=60)
+        client.loop_start()
+        print(f"[MQTT] Verbonden met {BROKER_HOST}:{BROKER_PORT}")
+    except Exception as e:
+        print(f"[MQTT] Kan niet verbinden met broker: {e} — MQTT uitgeschakeld")
+        return None
+    return client
+
+
+def mqtt_publish(client, robot_id: str, x_px: float, y_px: float,
+                 heading: float, battery: int, status: str):
+    if client is None:
+        return
+    x_m, y_m = px_to_world(x_px, y_px)
+    theta     = heading_to_theta(heading)
+
+    # Positie topic (zelfde formaat als echte ArUco robots)
+    if status == "active":
+        client.publish(
+            f"city/robots/{robot_id}",
+            json.dumps({"x": x_m, "y": y_m, "theta": theta}),
+            qos=0,
+        )
+
+    # Batterij topic
+    if battery >= 0:
+        client.publish(
+            f"city/robots/{robot_id}/battery",
+            json.dumps({"battery": battery}),
+            qos=0,
+        )
+
+
 def main():
     os.makedirs(os.path.dirname(OUTPUT_FILE), exist_ok=True)
-    print(f"[Simulator] Schrijft naar: {OUTPUT_FILE}")
+
+    mqtt_client = mqtt_connect()
+    if not MQTT_AVAILABLE:
+        print("[Simulator] paho-mqtt niet geïnstalleerd — MQTT uitgeschakeld (pip install paho-mqtt)")
+    elif not MQTT_ENABLED:
+        print("[Simulator] MQTT uitgeschakeld (MQTT_ENABLED = False)")
+
+    # Als MQTT actief is, schrijft mqtt_bridge.py het bestand — niet de simulator zelf
+    write_file = mqtt_client is None
+    if write_file:
+        print(f"[Simulator] Schrijft naar: {OUTPUT_FILE} (geen MQTT — directe modus)")
+    else:
+        print(f"[Simulator] MQTT modus — mqtt_bridge.py schrijft {OUTPUT_FILE}")
     print(f"[Simulator] {len(WAYPOINTS)} waypoints — robots volgen het parcours")
     print("[Simulator] Open http://localhost:8080/login.php")
     print("[Simulator] Druk Ctrl+C om te stoppen\n")
@@ -197,7 +285,6 @@ def main():
                 if status == "offline":
                     if r["id"] in frozen:
                         x, y, heading = frozen[r["id"]]["x"], frozen[r["id"]]["y"], frozen[r["id"]]["heading"]
-                    # anders laatste berekende positie (eerste keer offline)
                 else:
                     frozen[r["id"]] = {"x": x, "y": y, "heading": heading}
 
@@ -211,20 +298,30 @@ def main():
                     "battery": battery,
                 })
 
-            tmp = OUTPUT_FILE + ".tmp"
-            with open(tmp, "w", encoding="utf-8") as f:
-                json.dump(output, f)
-            os.replace(tmp, OUTPUT_FILE)
+                # Publiceer op MQTT (zelfde topics als echte robots)
+                mqtt_publish(mqtt_client, r["id"], x, y, heading, battery, status)
+
+            # Alleen direct naar bestand schrijven als MQTT niet beschikbaar is
+            if write_file:
+                tmp = OUTPUT_FILE + ".tmp"
+                with open(tmp, "w", encoding="utf-8") as f:
+                    json.dump(output, f)
+                os.replace(tmp, OUTPUT_FILE)
 
             active = sum(1 for r in output if r["status"] == "active")
             low    = [r["label"] for r in output if 0 <= r["battery"] <= 20]
-            print(f"\r[t={t:6.1f}s] {active}/8 actief | Lage batterij: {low if low else 'geen'}   ", end="")
+            mqtt_info = f"| MQTT: {'aan' if mqtt_client else 'uit'}" if MQTT_ENABLED else ""
+            print(f"\r[t={t:6.1f}s] {active}/8 actief | Lage batterij: {low if low else 'geen'} {mqtt_info}   ", end="")
 
             time.sleep(0.5)
             t += 0.5
 
     except KeyboardInterrupt:
         print("\n[Simulator] Gestopt.")
+    finally:
+        if mqtt_client:
+            mqtt_client.loop_stop()
+            mqtt_client.disconnect()
 
 
 if __name__ == "__main__":

@@ -51,10 +51,10 @@ IMG_H = 1696
 # Stap 3: zoek pixel (x,y) van rechteronderhoek track → bereken TRACK_PX_W en TRACK_PX_H
 #
 # Zolang je dit niet weet: zet alles op 0 / volledige afbeelding (huidige standaard)
-TRACK_OFFSET_X = 267    # pixels zwarte rand links (auto-gedetecteerd)
-TRACK_OFFSET_Y = 204    # pixels zwarte rand boven (auto-gedetecteerd)
-TRACK_PX_W     = 2124   # breedte van de track in pixels
-TRACK_PX_H     = 1257   # hoogte van de track in pixels
+TRACK_OFFSET_X = 455    # pixels zwarte rand links
+TRACK_OFFSET_Y = 238    # pixels zwarte rand boven
+TRACK_PX_W     = 1620   # breedte van de track in pixels
+TRACK_PX_H     = 1185   # hoogte van de track in pixels
 # ─────────────────────────────────────────────────────────────
 
 # Robot offline na N seconden zonder update
@@ -92,11 +92,11 @@ camera_url: str = ""
 def world_to_px(x_m: float, y_m: float) -> tuple[float, float]:
     """
     Converteert wereld-coördinaten (meters) naar pixel-coördinaten.
-    Houdt rekening met TRACK_OFFSET en TRACK_PX afmetingen voor
-    correcte mapping op de track-foto (exclusief grijze rand).
+    De track-foto is 180° gedraaid t.o.v. Team 1's coördinatenstelsel,
+    dus X en Y worden gespiegeld.
     """
-    px = TRACK_OFFSET_X + (x_m / WORLD_W) * TRACK_PX_W
-    py = TRACK_OFFSET_Y + (y_m / WORLD_H) * TRACK_PX_H
+    px = TRACK_OFFSET_X + (1.0 - x_m / WORLD_W) * TRACK_PX_W
+    py = TRACK_OFFSET_Y + (1.0 - y_m / WORLD_H) * TRACK_PX_H
     return round(px, 1), round(py, 1)
 
 

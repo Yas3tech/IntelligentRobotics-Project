@@ -99,6 +99,7 @@ $cameraUrl = CAMERA_STREAM_URL;
             src="<?= htmlspecialchars($cameraUrl, ENT_QUOTES, 'UTF-8') ?>"
             alt="Top-view camera"
             class="camera-img"
+            onclick="openCamModal()"
             onerror="this.style.display='none'; document.getElementById('cam-error').style.display='block';"
           >
           <p id="cam-error" class="placeholder-text" style="display:none">
@@ -148,6 +149,27 @@ $cameraUrl = CAMERA_STREAM_URL;
   data-role="<?= $role ?>"
   hidden
 ></div>
+
+<!-- ========== CAMERA MODAL ========== -->
+<?php if ($cameraUrl): ?>
+<div id="cam-modal" class="cam-modal" onclick="closeCamModal()">
+  <div class="cam-modal-inner" onclick="event.stopPropagation()">
+    <div class="cam-modal-header">
+      <span>TOP-VIEW CAMERA &nbsp;<span class="cam-live-dot"></span></span>
+      <button class="cam-modal-close" onclick="closeCamModal()">✕</button>
+    </div>
+    <img
+      src="<?= htmlspecialchars($cameraUrl, ENT_QUOTES, 'UTF-8') ?>"
+      alt="Top-view camera fullscreen"
+    >
+  </div>
+</div>
+<script>
+function openCamModal()  { document.getElementById('cam-modal').classList.add('open'); }
+function closeCamModal() { document.getElementById('cam-modal').classList.remove('open'); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeCamModal(); });
+</script>
+<?php endif; ?>
 
 <script src="assets/app.js"></script>
 </body>

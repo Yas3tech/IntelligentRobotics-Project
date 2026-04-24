@@ -46,7 +46,8 @@ define('TRACK_IMAGE', file_exists(__DIR__ . '/../assets/track1.jpg') ? 'assets/t
 // --- Camera stream ---
 // URL naar de MJPEG of WebRTC stream van Team 1 (Jetson top-view camera)
 // Laat leeg ('') om de placeholder te tonen
-define('CAMERA_STREAM_URL', '');
+define('CAMERA_STREAM_URL', 'http://jetson-dang.local:8080/video');
+
 
 // --- Batterij waarschuwingsdrempel (%) ---
 define('LOW_BATTERY_THRESHOLD', 20);

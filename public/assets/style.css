@@ -591,7 +591,60 @@ body {
   border       : 1px solid var(--border);
   display      : block;
   background   : var(--bg-panel);
+  cursor       : zoom-in;
+  transition   : border-color 0.15s;
 }
+.camera-img:hover { border-color: var(--amber); }
+
+/* ---- CAMERA MODAL ---- */
+.cam-modal {
+  display        : none;
+  position       : fixed;
+  inset          : 0;
+  z-index        : 1000;
+  background     : rgba(0,0,0,0.85);
+  align-items    : center;
+  justify-content: center;
+}
+.cam-modal.open { display: flex; }
+
+.cam-modal-inner {
+  position      : relative;
+  max-width     : 90vw;
+  max-height    : 90vh;
+  border        : 1px solid var(--border-hi);
+  border-radius : var(--radius);
+  overflow      : hidden;
+  background    : var(--bg-panel);
+}
+.cam-modal-inner img {
+  display   : block;
+  max-width : 90vw;
+  max-height: 85vh;
+  object-fit: contain;
+}
+.cam-modal-header {
+  display        : flex;
+  align-items    : center;
+  justify-content: space-between;
+  padding        : 8px 12px;
+  background     : var(--bg-surface);
+  border-bottom  : 1px solid var(--border);
+  font-family    : var(--text-mono);
+  font-size      : 11px;
+  letter-spacing : 0.1em;
+  color          : var(--text-sec);
+}
+.cam-modal-close {
+  background : none;
+  border     : none;
+  color      : var(--text-sec);
+  font-size  : 18px;
+  cursor     : pointer;
+  line-height: 1;
+  padding    : 0 4px;
+}
+.cam-modal-close:hover { color: var(--text-pri); }
 
 .cam-live-dot {
   display      : inline-block;
@@ -610,3 +663,42 @@ body {
 
 /* offline count in statusbar */
 #offline-count { color: var(--red); font-family: var(--text-mono); font-size: 10px; }
+
+/* ============================================================
+   RESPONSIVE — tablet & mobile
+   ============================================================ */
+
+/* Tablet (≤1024px): sidebar smaller */
+@media (max-width: 1024px) {
+  :root { --sidebar-w: 180px; }
+  .topbar-center { display: none; }
+}
+
+/* Mobile (≤768px): sidebar goes below map */
+@media (max-width: 768px) {
+  body { overflow: auto; }
+
+  .dash-layout {
+    flex-direction: column-reverse;
+  }
+
+  .sidebar {
+    width     : 100%;
+    height    : auto;
+    max-height: 280px;
+    overflow-y: auto;
+    border-top: 1px solid var(--border);
+    border-right: none;
+  }
+
+  .map-area {
+    height: 56vw;
+    min-height: 220px;
+  }
+
+  .topbar-center { display: none; }
+  .topbar-version { display: none; }
+
+  .robot-item-header { font-size: 11px; }
+  .robot-coords      { display: none; }
+}

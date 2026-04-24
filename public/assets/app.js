@@ -150,11 +150,58 @@
   }
 
   // ============================================================
+  // CALIBRATION CORNERS
+  // ============================================================
+  // Wereld-hoekpunten (meters): (0,0) TL · (6,0) TR · (0,3) BL · (6,3) BR
+  // Omgezet naar pixels via dezelfde offsets als mqtt_bridge.py
+  const TRACK_OFFSET_X = 455,  TRACK_OFFSET_Y = 238;
+  const TRACK_PX_W     = 1620, TRACK_PX_H    = 1185;
+  const WORLD_W = 6.0, WORLD_H = 3.0;
+
+  function worldToPx(xm, ym) {
+    return {
+      x: TRACK_OFFSET_X + (1.0 - xm / WORLD_W) * TRACK_PX_W,
+      y: TRACK_OFFSET_Y + (1.0 - ym / WORLD_H) * TRACK_PX_H,
+    };
+  }
+
+  const CORNERS = [
+    { xm: 0, ym: 0, label: '(0,0)' },
+    { xm: 6, ym: 0, label: '(6,0)' },
+    { xm: 0, ym: 3, label: '(0,3)' },
+    { xm: 6, ym: 3, label: '(6,3)' },
+  ];
+
+  function drawCalibrationCorners() {
+    CORNERS.forEach(c => {
+      const raw = worldToPx(c.xm, c.ym);
+      const { dx, dy } = toDisplay(raw.x, raw.y);
+
+      // Rood vierkantje (zoals ArUco marker)
+      ctx.save();
+      ctx.strokeStyle = '#ef4444';
+      ctx.lineWidth   = 2;
+      ctx.fillStyle   = 'rgba(239,68,68,0.15)';
+      ctx.fillRect(dx - 8, dy - 8, 16, 16);
+      ctx.strokeRect(dx - 8, dy - 8, 16, 16);
+
+      // Label
+      ctx.fillStyle    = '#ef4444';
+      ctx.font         = 'bold 9px "JetBrains Mono", monospace';
+      ctx.textAlign    = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText(c.label, dx, dy - 10);
+      ctx.restore();
+    });
+  }
+
+  // ============================================================
   // RENDER
   // ============================================================
   function render() {
     syncCanvasSize();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawCalibrationCorners();
     robots.forEach(r => drawRobot(r, r.id === selectedRobotId));
 
     // Herrender voor lage-batterij animatie
