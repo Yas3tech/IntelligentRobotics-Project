@@ -1,0 +1,15 @@
+# Claude interne bestanden
+.claude/
+
+# PHP sessies en tijdelijke bestanden
+*.tmp
+*.log
+
+# Live data (wordt gegenereerd door simulator/bridge)
+public/data/robots_live.json
+public/data/robot_overrides.json
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
