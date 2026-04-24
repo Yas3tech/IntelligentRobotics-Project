@@ -1,0 +1,74 @@
+[
+  {
+    "id": "robot_1",
+    "label": "R-01",
+    "x": 180,
+    "y": 120,
+    "heading": 45,
+    "status": "active",
+    "battery": 87
+  },
+  {
+    "id": "robot_2",
+    "label": "R-02",
+    "x": 340,
+    "y": 95,
+    "heading": 90,
+    "status": "active",
+    "battery": 72
+  },
+  {
+    "id": "robot_3",
+    "label": "R-03",
+    "x": 510,
+    "y": 130,
+    "heading": 135,
+    "status": "active",
+    "battery": 55
+  },
+  {
+    "id": "robot_4",
+    "label": "R-04",
+    "x": 620,
+    "y": 270,
+    "heading": 180,
+    "status": "active",
+    "battery": 91
+  },
+  {
+    "id": "robot_5",
+    "label": "R-05",
+    "x": 560,
+    "y": 420,
+    "heading": 225,
+    "status": "idle",
+    "battery": 33
+  },
+  {
+    "id": "robot_6",
+    "label": "R-06",
+    "x": 380,
+    "y": 460,
+    "heading": 270,
+    "status": "active",
+    "battery": 68
+  },
+  {
+    "id": "robot_7",
+    "label": "R-07",
+    "x": 200,
+    "y": 400,
+    "heading": 315,
+    "status": "active",
+    "battery": 79
+  },
+  {
+    "id": "robot_8",
+    "label": "R-08",
+    "x": 110,
+    "y": 260,
+    "heading": 0,
+    "status": "error",
+    "battery": 12
+  }
+]
