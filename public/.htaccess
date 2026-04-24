@@ -1,0 +1,16 @@
+# Bloquer l'accès direct aux dossiers sensibles
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule ^config/ - [F,L]
+  RewriteRule ^data/   - [F,L]
+  RewriteRule ^includes/ - [F,L]
+</IfModule>
+
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "SAMEORIGIN"
+  Header set Referrer-Policy "same-origin"
+  Header always set X-Robots-Tag "noindex"
+</IfModule>
