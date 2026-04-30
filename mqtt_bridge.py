@@ -12,12 +12,38 @@ Vereisten:
     pip install paho-mqtt
 """
 
+import ftplib
+import io
 import json
 import math
 import os
+import threading
 import time
+import urllib.request
 
 import paho.mqtt.client as mqtt
+
+
+# ============================================================
+# .ENV LADEN
+# ============================================================
+
+def _load_env(path: str) -> dict:
+    env = {}
+    try:
+        with open(path, encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                key, _, val = line.partition("=")
+                env[key.strip()] = val.strip()
+    except FileNotFoundError:
+        pass
+    return env
+
+_ENV_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
+_env = _load_env(_ENV_PATH)
 
 # ============================================================
 # CONFIGURATIE — pas aan indien nodig
@@ -68,6 +94,19 @@ OUTPUT_FILE = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
     "public", "data", "robots_live.json"
 )
+
+# ── FTP CONFIGURATIE (geladen uit .env) ───────────────────────
+FTP_HOST          = _env.get("FTP_HOST", "")
+FTP_USER          = _env.get("FTP_USER", "")
+FTP_PASSWORD      = _env.get("FTP_PASSWORD", "")
+FTP_WEBROOT       = _env.get("FTP_WEBROOT", "/")
+FTP_CAMS_DIR      = _env.get("FTP_CAMS_DIR", "/cams")
+FTP_CAMERA_FILE   = _env.get("FTP_CAMERA_FILENAME", "camera_snapshot.jpg")
+
+FTP_ROBOTS_INTERVAL  = 2.0   # seconden tussen robots_live.json uploads
+FTP_CAMERA_INTERVAL  = 30.0  # seconden tussen camera snapshots
+FTP_ENABLED = bool(FTP_HOST and FTP_USER and FTP_PASSWORD)
+# ─────────────────────────────────────────────────────────────
 
 # ============================================================
 # STATUS kleuren → vertaling van ArUco tracking events
@@ -233,6 +272,99 @@ def write_json():
 
 
 # ============================================================
+# FTP HULPFUNCTIES
+# ============================================================
+
+def _ftp_connect() -> ftplib.FTP | None:
+    try:
+        ftp = ftplib.FTP(FTP_HOST, timeout=10)
+        ftp.login(FTP_USER, FTP_PASSWORD)
+        ftp.set_pasv(True)
+        return ftp
+    except Exception as e:
+        print(f"[FTP] Verbinding mislukt: {e}")
+        return None
+
+
+def _ftp_upload_bytes(ftp: ftplib.FTP, remote_path: str, data: bytes) -> bool:
+    """Upload bytes naar remote_path op de FTP-server."""
+    try:
+        parts = remote_path.rsplit("/", 1)
+        if len(parts) == 2 and parts[0]:
+            try:
+                ftp.cwd(parts[0])
+            except ftplib.error_perm:
+                ftp.mkd(parts[0])
+                ftp.cwd(parts[0])
+            filename = parts[1]
+        else:
+            filename = remote_path.lstrip("/")
+        ftp.storbinary(f"STOR {filename}", io.BytesIO(data))
+        return True
+    except Exception as e:
+        print(f"[FTP] Upload mislukt ({remote_path}): {e}")
+        return False
+
+
+def _grab_mjpeg_frame(url: str, timeout: int = 5) -> bytes | None:
+    """Haal één JPEG-frame op uit een MJPEG-stream."""
+    try:
+        req = urllib.request.urlopen(url, timeout=timeout)
+        buf = b""
+        while len(buf) < 500_000:
+            buf += req.read(4096)
+            start = buf.find(b"\xff\xd8")
+            if start == -1:
+                continue
+            end = buf.find(b"\xff\xd9", start + 2)
+            if end != -1:
+                return buf[start:end + 2]
+        return None
+    except Exception:
+        return None
+
+
+def _ftp_robots_loop():
+    """Achtergrondthread: upload robots_live.json elke FTP_ROBOTS_INTERVAL seconden."""
+    print(f"[FTP] Robots-upload thread gestart (interval: {FTP_ROBOTS_INTERVAL}s)")
+    while True:
+        time.sleep(FTP_ROBOTS_INTERVAL)
+        if not os.path.exists(OUTPUT_FILE):
+            continue
+        try:
+            with open(OUTPUT_FILE, "rb") as f:
+                data = f.read()
+        except OSError:
+            continue
+        remote = f"{FTP_WEBROOT.rstrip('/')}/data/robots_live.json"
+        ftp = _ftp_connect()
+        if ftp:
+            ok = _ftp_upload_bytes(ftp, remote, data)
+            ftp.quit()
+            if ok:
+                print(f"[FTP] robots_live.json geüpload → {remote}")
+
+
+def _ftp_camera_loop():
+    """Achtergrondthread: upload camera snapshot elke FTP_CAMERA_INTERVAL seconden."""
+    stream_url = f"http://jetson-dang.local:8080/video"
+    remote = f"{FTP_CAMS_DIR.rstrip('/')}/{FTP_CAMERA_FILE}"
+    print(f"[FTP] Camera-upload thread gestart (interval: {FTP_CAMERA_INTERVAL}s)")
+    while True:
+        time.sleep(FTP_CAMERA_INTERVAL)
+        frame = _grab_mjpeg_frame(stream_url)
+        if frame is None:
+            print(f"[FTP] Camera: geen frame verkregen van {stream_url}")
+            continue
+        ftp = _ftp_connect()
+        if ftp:
+            ok = _ftp_upload_bytes(ftp, remote, frame)
+            ftp.quit()
+            if ok:
+                print(f"[FTP] Camera snapshot geüpload → {remote}")
+
+
+# ============================================================
 # MAIN
 # ============================================================
 
@@ -252,6 +384,13 @@ def main():
         print(f"[Bridge] Eerste verbinding mislukt: {e} — herprobeert automatisch")
 
     client.loop_start()
+
+    if FTP_ENABLED:
+        threading.Thread(target=_ftp_robots_loop, daemon=True).start()
+        threading.Thread(target=_ftp_camera_loop, daemon=True).start()
+        print(f"[FTP] Upload actief → {FTP_HOST}")
+    else:
+        print("[FTP] Uitgeschakeld (geen .env gevonden of incomplete credentials)")
 
     print(f"[Bridge] Schrijft naar: {OUTPUT_FILE}")
     print("[Bridge] Druk Ctrl+C om te stoppen\n")
