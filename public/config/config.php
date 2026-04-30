@@ -44,9 +44,11 @@ define('POLL_INTERVAL_MS', 500);
 define('TRACK_IMAGE', file_exists(__DIR__ . '/../assets/track1.jpg') ? 'assets/track1.jpg' : 'assets/track.svg');
 
 // --- Camera stream ---
-// URL naar de MJPEG of WebRTC stream van Team 1 (Jetson top-view camera)
-// Laat leeg ('') om de placeholder te tonen
-define('CAMERA_STREAM_URL', 'http://jetson-dang.local:8080/video');
+// Op de live webserver: statische snapshot die elke 30s door mqtt_bridge.py wordt geüpload.
+// Lokaal (Jetson bereikbaar): gebruik de live MJPEG stream.
+// Wissel de twee regels om afhankelijk van de omgeving.
+define('CAMERA_STREAM_URL', '/cams/camera_snapshot.jpg');   // webhosting (snapshot)
+// define('CAMERA_STREAM_URL', 'http://jetson-dang.local:8080/video'); // lokaal (live stream)
 
 
 // --- Batterij waarschuwingsdrempel (%) ---
