@@ -1,6 +1,9 @@
 # Claude interne bestanden
 .claude/
 
+# FTP credentials — nooit committen
+.env
+
 # PHP sessies en tijdelijke bestanden
 *.tmp
 *.log
