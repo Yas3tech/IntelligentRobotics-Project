@@ -120,7 +120,7 @@ $cameraUrl = CAMERA_STREAM_URL;
     <div class="map-wrapper">
       <img
         id="track-bg"
-        src="<?= htmlspecialchars(TRACK_IMAGE, ENT_QUOTES, 'UTF-8') ?>"
+        src="<?= htmlspecialchars(TRACK_IMAGE, ENT_QUOTES, 'UTF-8') ?>?v=<?= filemtime(__DIR__ . '/' . TRACK_IMAGE) ?>"
         alt="Track layout"
         class="track-image"
         draggable="false"
